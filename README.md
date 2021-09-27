@@ -1,5 +1,22 @@
 # JSFinder
 
+在使用JSFinder的过程中，发现集成在自己的分布式资产系统中存在如下使用问题：
+JSFinder.py -f urls.txt -os sub.txt
+```
+# urls.txt
+https://www.ohlinge.cn/
+https://www.jd.com/?test=dir
+```
+这样的结果下只会将ohlinge.cn的子域名记录下来，而jd.com的子域名则会忽略掉！
+原因在于：
+```
+giveresult(urls, urls[0])
+```
+由于我这里特殊的使用场景，故需要小改一下子域名发现逻辑，以实现urls.txt中包含不同域名时，可将它们子域名全记录下来。
+
+
+---
+
 JSFinder is a tool for quickly extracting URLs and subdomains from JS files on a website.
 
 JSFinder是一款用作快速在网站的js文件中提取URL，子域名的工具。

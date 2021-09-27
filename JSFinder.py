@@ -3,6 +3,9 @@
 # By Threezh1
 # https://threezh1.github.io/
 
+# changed by _lin9e <lin9e@qq.com> in 2021.9.27
+# TO input file have some different domain, output subdomains!
+
 import requests, argparse, sys, re
 from requests.packages import urllib3
 from urllib.parse import urlparse
@@ -147,20 +150,32 @@ def find_by_url(url, js = False):
 
 
 def find_subdomain(urls, mainurl):
-	url_raw = urlparse(mainurl)
-	domain = url_raw.netloc
-	miandomain = domain
-	positions = find_last(domain, ".")
-	if len(positions) > 1:miandomain = domain[positions[-2] + 1:]
 	subdomains = []
-	for url in urls:
-		suburl = urlparse(url)
-		subdomain = suburl.netloc
-		#print(subdomain)
-		if subdomain.strip() == "": continue
-		if miandomain in subdomain:
-			if subdomain not in subdomains:
-				subdomains.append(subdomain)
+	if isinstance(mainurl, list):
+		for miandomain in mainurl:
+			
+			for url in urls:
+				suburl = urlparse(url)
+				subdomain = suburl.netloc
+				#print(subdomain)
+				if subdomain.strip() == "": continue
+				if miandomain in subdomain:
+					if subdomain not in subdomains:
+						subdomains.append(subdomain)
+	else:
+		url_raw = urlparse(mainurl)
+		domain = url_raw.netloc
+		miandomain = domain
+		positions = find_last(domain, ".")
+		if len(positions) > 1:miandomain = domain[positions[-2] + 1:]
+		for url in urls:
+			suburl = urlparse(url)
+			subdomain = suburl.netloc
+			#print(subdomain)
+			if subdomain.strip() == "": continue
+			if miandomain in subdomain:
+				if subdomain not in subdomains:
+					subdomains.append(subdomain)
 	return subdomains
 
 def find_by_url_deep(url):
@@ -237,6 +252,17 @@ def giveresult(urls, domian):
 		print("\nOutput " + str(len(subdomains)) + " subdomains")
 		print("Path:" + args.outputsubdomain)
 
+def get_main_domains(urls):
+	main_domains = []
+	for url in urls:
+		url_raw = urlparse(url)
+		domain = url_raw.netloc
+		miandomain = domain
+		positions = find_last(domain, ".")
+		if len(positions) > 1:miandomain = domain[positions[-2] + 1:]
+		main_domains.append(miandomain)
+	return list(set(main_domains))
+
 if __name__ == "__main__":
 	urllib3.disable_warnings()
 	args = parse_args()
@@ -250,7 +276,8 @@ if __name__ == "__main__":
 	else:
 		if args.js is not True:
 			urls = find_by_file(args.file)
-			giveresult(urls, urls[0])
+			giveresult(urls, get_main_domains(urls))
 		else:
 			urls = find_by_file(args.file, js = True)
-			giveresult(urls, urls[0])
+			giveresult(urls, get_main_domains(urls))
+
